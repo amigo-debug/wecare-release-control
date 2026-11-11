@@ -1,0 +1,55 @@
+name: WeCare Release
+run-name: '${{ inputs.operation }} / ${{ inputs.project }} / ${{ inputs.version }}'
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'website = WeCare 官網 / erp = WeCare ERP'
+        type: choice
+        required: true
+        options: [website, erp]
+      operation:
+        description: 'check 只檢查 / publish 發佈 / rollback 回退'
+        type: choice
+        required: true
+        options: [check, publish, rollback]
+      version:
+        description: '已核准版本代號，見 releases.json；baseline 只可檢查'
+        type: string
+        required: true
+        default: baseline-20261111
+      confirm:
+        description: '我已測試選定版本，確認更改正式網站；check 不需要勾選'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: 'wecare-release-${{ inputs.project }}'
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.repository == 'amigo-debug/wecare-release-control' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: 'wecare-${{ inputs.project }}'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.16.0'
+      - name: Verify controller
+        run: node --test test/*.test.mjs
+      - name: Check or release the selected reviewed build
+        run: node scripts/release.mjs
+        env:
+          RELEASE_PROJECT: ${{ inputs.project }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_CONFIRM: ${{ inputs.confirm }}
+          RELEASE_ACTORS: ${{ vars.RELEASE_ACTORS }}
+          RELEASE_ENABLED: ${{ vars.RELEASE_ENABLED }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

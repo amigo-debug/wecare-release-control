@@ -1,0 +1,22 @@
+{
+  "website": {
+    "baseline-20261111": {
+      "deploymentId": "dpl_5Ksk9w3FpqvCtR7EQ6R8dMFcwUJE",
+      "sourceSha": null,
+      "reviewed": false,
+      "allowPublish": false,
+      "allowRollback": false,
+      "checks": { "application": false, "database": false, "automation": false }
+    }
+  },
+  "erp": {
+    "baseline-20261111": {
+      "deploymentId": "dpl_6UeCj479WCU7L23bK7SRLgpzgs8o",
+      "sourceSha": null,
+      "reviewed": false,
+      "allowPublish": false,
+      "allowRollback": false,
+      "checks": { "application": false, "database": false, "automation": false }
+    }
+  }
+}
