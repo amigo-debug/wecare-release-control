@@ -108,6 +108,13 @@ test('check performs only GET and returns a sanitized summary', async () => {
   assert.equal(result.status, 'checked');
   assert.ok(!JSON.stringify(result).includes(env.VERCEL_TOKEN));
 });
+test('scope failure reports only safe diagnostic flags, never provider data', async () => {
+  const mock = transport({ broad: true });
+  await assert.rejects(() => run(makePlan(), mock), error =>
+    /projectCount=2; targetPresent=true; hasMore=false/.test(error.message)
+    && !error.message.includes('prj_Other') && !error.message.includes(env.VERCEL_TOKEN));
+  assert.equal(mock.calls.length, 1);
+});
 for (const options of [{ broad: true }, { wrongScope: true },
   { candidate: { projectId: 'prj_Other' } }, { candidate: { target: 'preview' } },
   { candidate: { readyState: 'ERROR' } }, { candidate: { meta: {} } },

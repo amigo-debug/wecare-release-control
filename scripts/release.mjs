@@ -78,7 +78,10 @@ export async function executeRelease(plan, token, {
   const listing = await request('/v9/projects?limit=100');
   requireCondition(Array.isArray(listing.projects) && listing.projects.length === 1
     && listing.projects[0].id === plan.target.projectId && !listing.pagination?.next,
-  'Use one project-scoped token, not a team or full-account credential.');
+  'Project scope was not verified. '
+    + `projectCount=${Array.isArray(listing.projects) ? listing.projects.length : 'invalid'}; `
+    + `targetPresent=${Array.isArray(listing.projects) && listing.projects.some(item => item.id === plan.target.projectId)}; `
+    + `hasMore=${Boolean(listing.pagination?.next)}. No release was attempted.`);
   const other = Object.values(TARGETS).find(t => t.projectId !== plan.target.projectId);
   await request(`/v9/projects/${other.projectId}`, { denied: true });
   const deployment = await request(`/v13/deployments/${plan.release.deploymentId}`);
